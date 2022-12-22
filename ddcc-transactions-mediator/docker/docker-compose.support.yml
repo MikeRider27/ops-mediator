@@ -1,0 +1,56 @@
+version: '3.3'
+
+services:
+  fhir:
+    container_name: hapi-fhir
+    image: hapiproject/hapi:v6.1.0
+    networks:
+      - ddcc-net
+    environment:
+      - spring.datasource.url=jdbc:postgresql://db:5432/hapi
+      - spring.datasource.username=${POSTGRES_USER:-admin}
+      - spring.datasource.password=${POSTGRES_PASSWORD:-admin}
+      - spring.datasource.driverClassName=org.postgresql.Driver
+      - hapi.fhir.allow_external_references=true
+      - hapi.fhir.max_page_size=50
+      - hapi.fhir.default_page_size=20
+    volumes:
+      - type: volume
+        source: instant
+        target: /instant
+    # open hapi ports for development
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
+
+  resource-generation-service:
+    container_name: resource-generation-service
+    image: censcl/ops-ddcc-resource-generation-service:v1.0
+    networks:
+      - ddcc-net
+    ports:
+        - "8023:8080"
+
+
+  db:
+    container_name: hapi-postgres
+    image: postgres:11-alpine
+    networks:
+      - ddcc-net
+    environment:
+      POSTGRES_DB: 'hapi'
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+    volumes:
+      - 'hapi-postgres:/var/lib/postgresql'
+
+volumes:
+  hapi-postgres:
+  instant:
+
+networks:
+  ddcc-net:
+    external: false
+    name: ddcc-net

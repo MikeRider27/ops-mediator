@@ -1,0 +1,10 @@
+docker login
+
+docker build -t openhie/ddcc-transactions:latest -t openhie/ddcc-transactions:v1.0.20 .
+docker build -t openhie/ddcc-transactions-openhim:latest -t openhie/ddcc-transactions-openhim:v1.0.20 -f Dockerfile.openhim .
+
+#docker tag ddcc-transactions:latest openhie/ddcc-transactions:latest
+#docker tag ddcc-transactions-openhim:latest openhie/ddcc-transactions-openhim:latest
+
+docker push openhie/ddcc-transactions:latest
+docker push openhie/ddcc-transactions-openhim:latest

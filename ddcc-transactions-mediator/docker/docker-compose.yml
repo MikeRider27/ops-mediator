@@ -1,0 +1,72 @@
+version: '3.3'
+
+services:
+  ddcc:
+    container_name: ddcc-transactions-mediator
+    image: openhie/ddcc-transactions:latest
+    networks:
+      - ddcc-net
+    environment:
+      FHIR_SERVER: 'http://fhir:8080/fhir/'
+      MATCHBOX_SERVER: 'http://resource-generation-service:8080/fhir/'
+      MEDIATOR_HOST: 'ddcc'
+      OPENHIM_URL: 'https://core:8080'
+      OPENHIM_PASSWORD: 'ddcc.2022'
+      TRUST_SELF_SIGNED: 'true'
+      PRIVATE_KEY_FILE: '/app/cert-data/priv.pem'
+    volumes:
+      - ./../cert-data:/app/cert-data
+    ports:
+      - "4321:4321"
+    depends_on:
+      - fhir
+      - resource-generation-service
+
+  fhir:
+    container_name: hapi-fhir
+    image: hapiproject/hapi:v6.1.0
+    networks:
+      - ddcc-net
+    environment:
+      - spring.datasource.url=jdbc:postgresql://db:5432/hapi
+      - spring.datasource.username=${POSTGRES_USER:-admin}
+      - spring.datasource.password=${POSTGRES_PASSWORD:-admin}
+      - spring.datasource.driverClassName=org.postgresql.Driver
+      - hapi.fhir.allow_external_references=true
+      - hapi.fhir.max_page_size=50
+      - hapi.fhir.default_page_size=20
+    volumes:
+      - type: volume
+        source: instant
+        target: /instant
+    depends_on:
+      - db
+
+  resource-generation-service:
+    container_name: resource-generation-service
+    image: censcl/ops-ddcc-resource-generation-service:v1.0
+    networks:
+      - ddcc-net
+    ports:
+        - "8023:8080"
+
+  db:
+    container_name: hapi-postgres
+    image: postgres:11-alpine
+    networks:
+      - ddcc-net
+    environment:
+      POSTGRES_DB: 'hapi'
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+    volumes:
+      - 'hapi-postgres:/var/lib/postgresql'
+
+volumes:
+  hapi-postgres:
+  instant:
+
+networks:
+  ddcc-net:
+    external: false
+    name: ddcc-net
