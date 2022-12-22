@@ -99,103 +99,95 @@ docker-compose up -d
 ```
 La primera vez que ejecute el servicio docker realizará la descarga de las imagenes como se ve a continuación. Finalmente los contenedores son desplegados.
 
-![Aquí la descripción de la imagen por si no carga](https://raw.githubusercontent.com/parzibyte/WaterPy/master/assets/ImagenV1.png)
+![Aquí la descripción de la imagen por si no carga](https://raw.githubusercontent.com/MikeRider27/ops-mediator/master/ddcc-transactions-mediator/assets/c52f9273-74fe-4032-acd6-cd2c025bf0e2.png?token=GHSAT0AAAAAAB4GIVW33UUXDNQ3D5YDQ4PEY5EWMWA)
+
+### 2.4.1 Otras variantes sobre el servicio
+
+Para detener y remover el servicio utilice:
+
+```bash
+docker-compose down
+```
+
+Iniciar los servicios de docker-compose sin crearlos:
+
+```bash
+docker-compose start
+```
+
+Para detener uno o todos los servicios:
+
+```bash
+docker-compose stop
+```
+
+## 2.5 Verificar funcionamiento correcto del servidor
+
+Para verificar que el servidor esta en funcionamiento puede hacerlo desde la consola mediante el siguiente request:
+
+```bash
+curl -X GET http://localhost:8080/fhir/Patient
+```
+
+y obtener la siguiente respuesta:
+
+![Aquí la descripción de la imagen por si no carga](https://raw.githubusercontent.com/MikeRider27/ops-mediator/master/ddcc-transactions-mediator/assets/e7d2c681-7657-4326-9045-63d873faece5.png?token=GHSAT0AAAAAAB4GIVW3CHKHQFJBJFQY7LLMY5EWSRA)
+
+Otra manera de hacerlo es escribir la direccion localhost:8080 en el navegador. Debería visualizar la siguiente imagen:
+
+![Aquí la descripción de la imagen por si no carga](https://raw.githubusercontent.com/MikeRider27/ops-mediator/master/ddcc-transactions-mediator/assets/0c894dfc-2007-4261-8d24-10b46b3db267.png?token=GHSAT0AAAAAAB4GIVW3OVAQA5TRNDNEAEMMY5EW37A)
 
 ---
 
-## Configuring DDCC Mediator
+## 3. Servidor HAPI FHIR mediante Maven
 
-This mediator is configured using environment variables.
+Esta instalación permite realizar otro tipo de ajustes This mediator is configured using environment variables.
 
-The following variables can be set:
+## 3.1 Pre-requisitos
 
-| Environment Variable | Default | Description |
-| --- | --- | --- |
-| FHIR_SERVER | http://fhir:8080/fhir/ | URL of data repository |
-| MATCHBOX_SERVER | http://resource-generation-service:8080/fhir/ | URL of resource transformer |
-| MEDIATOR_HOST | ddcc | HOST used in mediador|
-| OPENHIM_URL | <https://localhost:8080> | The location of the the OpenHIM API |
-| OPENHIM_USERNAME | root@openhim.org | Registered OpenHIM Username |
-| OPENHIM_PASSWORD | openhim-password | Password of the registered OpenHIM user |
-| TRUST_SELF_SIGNED | `false` | In development environments the OpenHIM uses self-signed certificates therefore it is insecure. To allow the mediator to communicate with the OpenHIM via HTTPS this variable can be set to `true` to ignore the security risk. **This should only be done in a development environment** |
+* Oracle Java JDK 17 o mayor
+* Apache Maven última versión (>= 3.6) [Maven – Installing Apache Maven](https://maven.apache.org/install.html)
+* Procesador. Al menos dos nucleos de procesador.
+* Al menos 4 GB de Memoría RAM
 
----
+## 3.2 Descarga del proyecto
 
-## Configuring OpenHIM
+1. Ir a la página principal del proyecto github hapi-fhir-jpaserver-starter [GitHub - hapifhir/hapi-fhir-jpaserver-starter](https://github.com/hapifhir/hapi-fhir-jpaserver-starter)
+y entrar en releases
 
-To route requests from a client to destination systems, the OpenHIM needs to have `channels` configured to listen for specific requests and send them to specific endpoints.
+![Aquí la descripción de la imagen por si no carga](https://raw.githubusercontent.com/MikeRider27/ops-mediator/master/ddcc-transactions-mediator/assets/b3b2dcb3-b381-43ad-bd69-1eec83c0216a.png?token=GHSAT0AAAAAAB4GIVW3QSGAJA3PJUKRQQVOY5EXDLA)
 
-This mediator is configured (within [mediatorConfig.json](mediatorConfig.json)) to create some default channels and endpoints. To create these channels navigate to the mediators page on the OpenHIM Console.
+2. Busque en la lista el release correspondiente a image/v6.1.0
 
----
+3. Descargar “Source code”, seleccionar descarga en formato .zip o .tar.gz
 
-## Instructions for the development team
+![Aquí la descripción de la imagen por si no carga](https://raw.githubusercontent.com/MikeRider27/ops-mediator/master/ddcc-transactions-mediator/assets/9a957001-285c-4ea8-92ac-8eb1c398092c.png?token=GHSAT0AAAAAAB4GIVW3YFQXC5SFVR5ZV7ESY5EXFOQ)
 
-### Create a private key
-
-* add the private key to the path /cert-data if you have one.
-* generate one inside de folder cert-data/
+4. Descomprimir proyecto y acceder a la carpeta por consola
 
 ```bash
-cd cert-data/
-openssl genrsa -out priv.pem 2048
+wget https://github.com/hapifhir/hapi-fhir-jpaserver-starter/archive/refs/tags/image/v6.1.0.zip
+unzip v6.1.0.zip
+cd v6.1.0
 ```
 
-### Run DDCC mediator with OpenHIM
+## 3.3 Compilar el proyecto
 
-#### For use with an external repository
-
-* Review installation guide [Repository install](https://cens.atlassian.net/wiki/spaces/OD/pages/2011365377/Instalaci+n+Servidor+HL7+FHIR+OPS+DDCC+Repositorio)
-
-* create an environment variable call FHIR_SERVER with the url of the repository and a network call ddcc_net
+En la consola ejecutar una de las siguientes instrucciones:
 
 ```bash
-export FHIR_SERVER=http://fhir:8080/fhir/
-docker network create -d bridge ddcc-net
-docker build -t openhie/ddcc-transactions-openhim:latest -t openhie/ddcc-transactions-openhim:v1.0.20 -f Dockerfile.openhim .
-docker-compose -f docker/docker-compose.openhim-external-repo.yml up -d
+mvn clean install -DskipTests
 ```
-#### For use without an external repository 
+
+La compilación exitosa del proyecto debiera arrojar un resultado como el que se muestra a continuación:
+
+![Aquí la descripción de la imagen por si no carga](https://raw.githubusercontent.com/MikeRider27/ops-mediator/master/ddcc-transactions-mediator/assets/5e484ba4-922b-4617-be31-200756690d56.png?token=GHSAT0AAAAAAB4GIVW2D6MQB544E5XPRQNKY5EXQLA)
+
+## 3.4 Ejecutar el servidor
 
 ```bash
-docker build -t openhie/ddcc-transactions-openhim:latest -t openhie/ddcc-transactions-openhim:v1.0.20 -f Dockerfile.openhim .
-docker-compose -f docker/docker-compose.openhim.yml up -d
+mvn jetty:run 
+   "o" 
+mvn -Djetty.port=8888 jetty:run
 ```
-
-
-* Change the password in the OpenHIM console http://localhost:9000 use the user:passdord for access (root@openhim.org:openhim-password)
-* Use **ddcc.2022** as a new password
-* Login again into the console and use the user:password (root@openhim.org:ddcc.2022)
-* Create a client in http://localhost:9000/#!/clients (client ID = ddcc y client Name = ddcc)
-    * Go to authentication tab and add a basic auth password using `ddcc`
-    * Save changes
-* Go to Mediators page in the sidebar and install(+ button) the mediator to install the new channel
-* Test the new user using the credentials (user:password --> ddcc:ddcc)
-    * Example:
-```
-GET /ddcc/shc_issuer/.well-known/jwks.json HTTP/1.1
-Host: localhost:5001
-Authorization: Basic ZGRjYzpkZGNj
-```
-
-### Update the code changes
-
-* Run this to test changes
-
-* Use `docker_file` **docker/docker-compose.openhim-external-repo.yml** or **docker/docker-compose.openhim.yml**
-
-```bash
-docker-compose -f `docker_file` stop ddcc
-docker-compose -f `docker_file` rm ddcc -y
-docker build -t openhie/ddcc-transactions-openhim:latest -t openhie/ddcc-transactions-openhim:v1.0.20 -f Dockerfile.openhim .
-docker-compose -f `docker_file` up -d ddcc
-docker-compose -f `docker_file` logs  --follow ddcc
-
-```
-
-* if you want to inspect the database of hapifhir(server: hapi-postgres)
-
-```
-docker run -itd --network=ddcc-net -p 9001:8080 adminer
-```
-* Go to localhost:9001 and access to the database with credentials.
+Al terminar la compilación debería ver los mensajes que se ven en la siguiente imagen:
