@@ -191,3 +191,21 @@ mvn jetty:run
 mvn -Djetty.port=8888 jetty:run
 ```
 Al terminar la compilación debería ver los mensajes que se ven en la siguiente imagen:
+
+![Aquí la descripción de la imagen por si no carga](https://raw.githubusercontent.com/MikeRider27/ops-mediator/master/ddcc-transactions-mediator/assets/a7b47d89-d22b-4f5e-b451-88cf6f21e456.png?token=GHSAT0AAAAAAB4GIVW26CNZYTHQXAVNABXEY5EXUCQ)
+
+## 3.5 Verificar funcionamiento correcto del servidor
+
+Para verificar que el servidor esta en funcionamiento puede hacerlo desde la consola mediante el siguiente request:
+
+```bash
+curl -X GET http://localhost:8080/fhir/Patient
+```
+
+y obtener la siguiente respuesta:
+
+![Aquí la descripción de la imagen por si no carga](https://raw.githubusercontent.com/MikeRider27/ops-mediator/master/ddcc-transactions-mediator/assets/e7d2c681-7657-4326-9045-63d873faece5.png?token=GHSAT0AAAAAAB4GIVW3CHKHQFJBJFQY7LLMY5EWSRA)
+
+Otra manera de hacerlo es escribir la direccion localhost:8080 en el navegador. Debería visualizar la siguiente imagen:
+
+![Aquí la descripción de la imagen por si no carga](https://raw.githubusercontent.com/MikeRider27/ops-mediator/master/ddcc-transactions-mediator/assets/0c894dfc-2007-4261-8d24-10b46b3db267.png?token=GHSAT0AAAAAAB4GIVW3OVAQA5TRNDNEAEMMY5EW37A)
